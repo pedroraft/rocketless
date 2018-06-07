@@ -30,7 +30,7 @@ export default class Args {
    * id field still required to find the row to update
    * TODO: snafu
    */
-  get argsUpdate() {
+  get update() {
     const args = this.getArgs();
     Object.keys(args).forEach(key => {
       if (Args.ignoreFields(key)) delete args[key];
@@ -46,7 +46,7 @@ export default class Args {
   /**
    * gets all the args minus the id
    */
-  get argsCreate() {
+  get create() {
     const args = this.getArgs();
     Object.keys(args).forEach(key => {
       if (Args.ignoreFields(key, ["id"])) delete args[key];
@@ -57,7 +57,7 @@ export default class Args {
   /**
    * returns only the id field args
    */
-  get argsOnlyId() {
+  get onlyId() {
     const args = this.getArgs();
     if (args.id) return { id: args.id };
     throw new Error("id not found");

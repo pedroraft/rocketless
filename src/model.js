@@ -2,6 +2,7 @@ import { GraphQLList, GraphQLObjectType } from "graphql";
 import joinMonster from "join-monster";
 
 import Args from "./args";
+import {create, del, update} from "./actions";
 
 export default class Model {
   constructor(knex, fields, options) {
@@ -33,7 +34,31 @@ export default class Model {
     };
   }
 
+  get GraphqlMutation() {
+    return {
+      [`create${this.name}`]: {
+        type: this.graphqlObject,
+        args: this.args.create(),
+        resolve: (parent, args) => this.create(args)
+      },
+      [`update${this.name}`]: {},
+      [`delete${this.name}`]: {},
+    };
+  }
+
   get name() {
     return this.options.name || this.constructor.name.toLowerCase();
+  }
+
+  async create(args) {
+    return create(this.knex, this.name, args);
+  }
+
+  async update(args) {
+    return update(this.knex, this.name, this.fields, args);
+  }
+
+  async del(id) {
+    return del(this.knex, this.name, id);
   }
 }
