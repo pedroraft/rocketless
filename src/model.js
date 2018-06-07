@@ -1,44 +1,39 @@
 import { GraphQLList, GraphQLObjectType } from "graphql";
 import joinMonster from "join-monster";
 
+import Args from "./args";
+
 export default class Model {
   constructor(knex, fields, options) {
     this.knex = knex;
     this.fields = fields;
     this.options = options;
-    this.graphqlObject = {};
-    this.graphqlQuery = {};
-    this.build();
+    this.args = new Args(this.fields);
   }
-
-  build() {
-    this.buildGraphqlObject();
-  }
-
-  buildGraphqlObject() {
-    this.graphqlObject = new GraphQLObjectType({
-      name: this.getName(),
-      sqlTable: this.getName(),
+  
+  get graphqlObject() {
+    return new GraphQLObjectType({
+      name: this.name(),
+      sqlTable: this.name(),
       uniqueKey: "id",
       // TODO: clean fields (?)
       fields: this.fields
     });
   }
 
-  makeGraphqlQuery() {
-    this.graphqlQuery = {
+  get graphqlQuery() {
+    return {
       query: {
         type: new GraphQLList(this.graphqlObject),
-        resolve: (parent, args, context, resolveInfo) => {
-          return joinMonster(resolveInfo, context, sql => this.knex.raw(sql), {
+        resolve: (parent, args, context, resolveInfo) =>
+          joinMonster(resolveInfo, context, sql => this.knex.raw(sql), {
             dialect: "pg"
-          });
-        }
+          })
       }
     };
   }
 
-  getName() {
+  get name() {
     return this.options.name || this.constructor.name.toLowerCase();
   }
 }
